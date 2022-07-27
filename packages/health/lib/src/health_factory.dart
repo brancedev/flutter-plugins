@@ -116,6 +116,12 @@ class HealthFactory {
     return isAuthorized ?? false;
   }
 
+  Future<bool> disconnectGoogleFit() async {
+    final bool disconnectGoogleFit =
+        await _channel.invokeMethod('disconnectGoogleFit');
+    return disconnectGoogleFit;
+  }
+
   static void _handleBMI(List<HealthDataType> mTypes, List<int> mPermissions) {
     final index = mTypes.indexOf(HealthDataType.BODY_MASS_INDEX);
 

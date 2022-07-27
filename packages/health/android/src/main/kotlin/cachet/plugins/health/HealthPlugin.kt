@@ -638,6 +638,27 @@ class HealthPlugin(private var channel: MethodChannel? = null) : MethodCallHandl
     Log.i("FLUTTER_HEALTH::ERROR", exception.message ?: "unknown error")
     Log.i("FLUTTER_HEALTH::ERROR", exception.stackTrace.toString())
   }
+  
+  private fun disconnectGoogleFit(result: Result) {
+      val fitnessOptions = FitnessOptions.builder().build()
+
+      Fitness.getConfigClient(context, GoogleSignIn.getLastSignedInAccount(context)!!)
+          .disableFit()
+          .continueWithTask {
+              val signInOptions = GoogleSignInOptions.Builder()
+                  .addExtension(fitnessOptions)
+                  .build()
+              GoogleSignIn.getClient(context, signInOptions)
+                  .revokeAccess()
+                  .addOnSuccessListener {
+                      result.success(true)
+                  }
+                  .addOnFailureListener {
+                      // receives error with no message and status code 4
+                      result.success(false)
+                  }
+          }
+  }
 
   private fun sleepDataHandler(type: String, result: Result) =
     OnSuccessListener { response: SessionReadResponse ->
