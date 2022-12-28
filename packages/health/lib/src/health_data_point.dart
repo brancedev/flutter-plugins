@@ -1,8 +1,9 @@
-part of '../health.dart';
+part of health;
 
-/// A [HealthDataPoint] object corresponds to a data point captures from GoogleFit or Apple HealthKit
+/// A [HealthDataPoint] object corresponds to a data point capture from
+/// GoogleFit or Apple HealthKit with a [HealthValue] as value.
 class HealthDataPoint {
-  num _value;
+  HealthValue _value;
   HealthDataType _type;
   HealthDataUnit _unit;
   DateTime _dateFrom;
@@ -12,7 +13,7 @@ class HealthDataPoint {
   String _sourceId;
   String _sourceName;
 
-  HealthDataPoint._(
+  HealthDataPoint(
       this._value,
       this._type,
       this._unit,
@@ -22,9 +23,14 @@ class HealthDataPoint {
       this._deviceId,
       this._sourceId,
       this._sourceName) {
-    /// Set the value to minutes rather than the category
-    /// returned by the native API
+    // set the value to minutes rather than the category
+    // returned by the native API
     if (type == HealthDataType.MINDFULNESS ||
+        type == HealthDataType.HEADACHE_UNSPECIFIED ||
+        type == HealthDataType.HEADACHE_NOT_PRESENT ||
+        type == HealthDataType.HEADACHE_MILD ||
+        type == HealthDataType.HEADACHE_MODERATE ||
+        type == HealthDataType.HEADACHE_SEVERE ||
         type == HealthDataType.SLEEP_IN_BED ||
         type == HealthDataType.SLEEP_ASLEEP ||
         type == HealthDataType.SLEEP_AWAKE) {
@@ -32,86 +38,109 @@ class HealthDataPoint {
     }
   }
 
-  double _convertMinutes() {
+  NumericHealthValue _convertMinutes() {
     int ms = dateTo.millisecondsSinceEpoch - dateFrom.millisecondsSinceEpoch;
-    return ms / (1000 * 60);
+    return NumericHealthValue(ms / (1000 * 60));
+  }
+
+  /// Converts a json object to the [HealthDataPoint]
+  factory HealthDataPoint.fromJson(json) {
+    HealthValue healthValue;
+    if (json['data_type'] == 'audiogram') {
+      healthValue = AudiogramHealthValue.fromJson(json['value']);
+    } else {
+      healthValue = NumericHealthValue.fromJson(json['value']);
+    }
+
+    return HealthDataPoint(
+        healthValue,
+        HealthDataType.values.firstWhere(
+            (element) => element.typeToString() == json['data_type']),
+        HealthDataUnit.values
+            .firstWhere((element) => element.typeToString() == json['unit']),
+        DateTime.parse(json['date_from']),
+        DateTime.parse(json['date_to']),
+        PlatformTypeJsonValue.keys.toList()[PlatformTypeJsonValue.values
+            .toList()
+            .indexOf(json['platform_type'])],
+        json['device_id'],
+        json['source_id'],
+        json['source_name']);
   }
 
   /// Converts the [HealthDataPoint] to a json object
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['value'] = this.value;
-    data['unit'] = this.unit;
-    data['date_from'] = this.dateFrom;
-    data['date_to'] = this.dateTo;
-    data['data_type'] = this.type;
-    data['platform_type'] = this.platform;
-    data['source_id'] = this.sourceId;
-    data['source_name'] = this.sourceName;
-    return data;
-  }
+  Map<String, dynamic> toJson() => {
+        'value': value.toJson(),
+        'data_type': type.typeToString(),
+        'unit': unit.typeToString(),
+        'date_from': dateFrom.toIso8601String(),
+        'date_to': dateTo.toIso8601String(),
+        'platform_type': PlatformTypeJsonValue[platform],
+        'device_id': deviceId,
+        'source_id': sourceId,
+        'source_name': sourceName
+      };
 
-  /// Converts the [HealthDataPoint] to a string
-  String toString() => '${this.runtimeType} - '
-      'value: $value, '
-      'unit: $unit, '
-      'dateFrom: $dateFrom, '
-      'dateTo: $dateTo, '
-      'dataType: $type,'
-      'platform: $platform';
+  @override
+  String toString() => """${this.runtimeType} - 
+    value: ${value.toString()},
+    unit: $unit,
+    dateFrom: $dateFrom,
+    dateTo: $dateTo,
+    dataType: $type,
+    platform: $platform,
+    deviceId: $deviceId,
+    sourceId: $sourceId,
+    sourceName: $sourceName""";
 
-  /// Get the quantity value of the data point
-  num get value => _value;
+  // / The quantity value of the data point
+  HealthValue get value => _value;
 
-  /// Get the start of the datetime interval
+  /// The start of the time interval
   DateTime get dateFrom => _dateFrom;
 
-  /// Get the end of the datetime interval
+  /// The end of the time interval
   DateTime get dateTo => _dateTo;
 
-  /// Get the type of the data point
+  /// The type of the data point
   HealthDataType get type => _type;
 
-  /// Get the unit of the data point
+  /// The unit of the data point
   HealthDataUnit get unit => _unit;
 
-  /// Get the software platform of the data point
-  /// (i.e. Android or iOS)
+  /// The software platform of the data point
   PlatformType get platform => _platform;
 
-  /// Get the data point type as a string
-  String get typeString => _enumToString(_type);
+  /// The data point type as a string
+  String get typeString => _type.typeToString();
 
-  /// Get the data point unit as a string
-  String get unitString => _enumToString(_unit);
+  /// The data point unit as a string
+  String get unitString => _unit.typeToString();
 
-  /// Get the id of the device from which
-  /// the data point was extracted
+  /// The id of the device from which the data point was fetched.
   String get deviceId => _deviceId;
 
-  /// Get the id of the source from which
-  /// the data point was extracted
+  /// The id of the source from which the data point was fetched.
   String get sourceId => _sourceId;
 
-  /// Get the name of the source from which
-  /// the data point was extracted
+  /// The name of the source from which the data point was fetched.
   String get sourceName => _sourceName;
 
-  /// An equals (==) operator for comparing two data points
-  /// This makes it possible to remove duplicate data points.
   @override
   bool operator ==(Object o) {
     return o is HealthDataPoint &&
-        value == o.value &&
-        unit == o.unit &&
-        dateFrom == o.dateFrom &&
-        dateTo == o.dateTo &&
-        type == o.type &&
-        platform == o.platform &&
-        deviceId == o.deviceId;
+        this.value == o.value &&
+        this.unit == o.unit &&
+        this.dateFrom == o.dateFrom &&
+        this.dateTo == o.dateTo &&
+        this.type == o.type &&
+        this.platform == o.platform &&
+        this.deviceId == o.deviceId &&
+        this.sourceId == o.sourceId &&
+        this.sourceName == o.sourceName;
   }
 
-  /// Override required due to overriding the '==' operator
   @override
-  int get hashCode => toJson().hashCode;
+  int get hashCode => Object.hash(value, unit, dateFrom, dateTo, type, platform,
+      deviceId, sourceId, sourceName);
 }

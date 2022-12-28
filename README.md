@@ -10,7 +10,7 @@ For more information about plugins, and how to use them, see
 ## Plugins
 These are the available plugins in this repository.
 
-| Plugin | Description | Android | iOS |    Pub    | 
+| Plugin | Description | Android | iOS |    http://pub.dev/    | 
 |--------|-------------|:-------:|:---:|:---------:|
 | [screen_state](./packages/screen_state) | Track screen state changes | ✔️ | ❌ | [![pub package](https://img.shields.io/pub/v/screen_state.svg)](https://pub.dartlang.org/packages/screen_state) |
 | [light](./packages/light) | Track light sensor readings | ✔️ | ❌ |  [![pub package](https://img.shields.io/pub/v/light.svg)](https://pub.dartlang.org/packages/light) |
@@ -20,7 +20,7 @@ These are the available plugins in this repository.
 | [weather](./packages/weather) | Get current weather, as well as forecasting using the OpenWeatherMap API. | ✔️ | ✔️  | [![pub package](https://img.shields.io/pub/v/weather.svg)](https://pub.dartlang.org/packages/weather) |
 | [air_quality](./packages/air_quality) | Get the air quality index using the WAQI API. | ✔️ | ✔️  | [![pub package](https://img.shields.io/pub/v/air_quality.svg)](https://pub.dartlang.org/packages/air_quality) |
 | [notifications](./packages/notifications) | Track device notifications. | ✔️ | ❌  | [![pub package](https://img.shields.io/pub/v/notifications.svg)](https://pub.dartlang.org/packages/notifications) |
-| [movisens_flutter](./packages/movisens_flutter) | Movisens sensor communication. | ✔️ | ❌  | [![pub package](https://img.shields.io/pub/v/movisens_flutter.svg)](https://pub.dartlang.org/packages/movisens_flutter) |
+| [movisens_flutter](./packages/movisens_flutter) | Movisens sensor communication. | ✔️ | ✔️  | [![pub package](https://img.shields.io/pub/v/movisens_flutter.svg)](https://pub.dartlang.org/packages/movisens_flutter) |
 | [esense_flutter](./packages/esense_flutter) | eSense ear sensor plugin. | ✔️ | ✔️  | [![pub package](https://img.shields.io/pub/v/esense_flutter.svg)](https://pub.dartlang.org/packages/esense_flutter) |
 | [health](./packages/health) | Apple HealthKit and Google Fit interface plugin. | ✔️ | ✔️  | [![pub package](https://img.shields.io/pub/v/health.svg)](https://pub.dartlang.org/packages/health) |
 | [activity_recognition](./packages/activity_recognition_flutter) | Activity Recognition | ✔️ | ✔️  | [![pub package](https://img.shields.io/pub/v/activity_recognition_flutter.svg)](https://pub.dartlang.org/packages/activity_recognition_flutter) |
@@ -35,15 +35,19 @@ Please check existing issues and file any new issues, bugs, or feature requests 
 
 ## Contributing
 
-If you wish to contribute a new plugin to the Flutter ecosystem, please
+As part of the open-source Flutter ecosystem, we would welcome any help in maintaining and enhancing these plugins. 
+We (i.e., CACHET) have limited resources for maintaining these plugins and we rely on **your** help in this.
+We welcome any contribution -- from small error corrections in the documentation, to bug fixes, to large features enhacements, or even new features in a plugin.
+If you wish to contribute to any of the plugins in this repo,
+please review our [contribution guide](https://github.com/cph-cachet/flutter-plugins/CONTRIBUTING.md),
+and send a [pull request](https://github.com/cph-cachet/flutter-plugins/pulls).
+
+
+In general, if you wish to contribute a new plugin to the Flutter ecosystem, please
 see the documentation for [developing packages](https://flutter.io/developing-packages/) and
 [platform channels](https://flutter.io/platform-channels/). You can store
 your plugin source code in any GitHub repository (the present repo is only
 intended for plugins developed by the core CARP team). Once your plugin
 is ready you can [publish](https://flutter.io/developing-packages/#publish)
 to the [pub repository](https://pub.dartlang.org/).
-
-If you wish to contribute a change to any of the existing plugins in this repo,
-please review our [contribution guide](https://github.com/cph-cachet/flutter-plugins/CONTRIBUTING.md),
-and send a [pull request](https://github.com/cph-cachet/flutter-plugins/pulls).
 
