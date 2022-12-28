@@ -113,6 +113,7 @@ class HealthFactory {
       }
     }
 
+    // ignore: unused_element
     Future<bool> disconnectGoogleFit() async {
     final bool disconnectGoogleFit = await _channel.invokeMethod('disconnectGoogleFit');
     return disconnectGoogleFit;
