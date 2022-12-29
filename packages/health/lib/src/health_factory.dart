@@ -113,12 +113,6 @@ class HealthFactory {
       }
     }
 
-    // ignore: unused_element
-    Future<bool> disconnectGoogleFit() async {
-    final bool disconnectGoogleFit = await _channel.invokeMethod('disconnectGoogleFit');
-    return disconnectGoogleFit;
-    }
-
     final mTypes = List<HealthDataType>.from(types, growable: true);
     final mPermissions = permissions == null
         ? List<int>.filled(types.length, HealthDataAccess.READ.index,
@@ -132,6 +126,11 @@ class HealthFactory {
     final bool? isAuthorized = await _channel.invokeMethod(
         'requestAuthorization', {'types': keys, "permissions": mPermissions});
     return isAuthorized ?? false;
+  }
+
+  Future<bool> disconnectGoogleFit() async {
+    final bool disconnectGoogleFit = await _channel.invokeMethod('disconnectGoogleFit');
+    return disconnectGoogleFit;
   }
 
   static void _handleBMI(List<HealthDataType> mTypes, List<int> mPermissions) {
