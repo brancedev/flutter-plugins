@@ -6,9 +6,7 @@ import 'package:carp_background_location/carp_background_location.dart';
 import 'package:mobility_features/mobility_features.dart';
 
 part 'stops_page.dart';
-
 part 'moves_page.dart';
-
 part 'places_page.dart';
 
 void main() => runApp(MyApp());
@@ -24,9 +22,7 @@ Widget entry(String key, String value, Icon icon) {
       ));
 }
 
-String formatDate(DateTime date) {
-  return '${date.year}/${date.month}/${date.day}';
-}
+String formatDate(DateTime date) => '${date.year}/${date.month}/${date.day}';
 
 String interval(DateTime a, DateTime b) {
   String pad(int x) => '${x.toString().padLeft(2, '0')}';
@@ -52,15 +48,14 @@ final varianceIcon = Icon(Icons.swap_calls);
 enum AppState { NO_FEATURES, CALCULATING_FEATURES, FEATURES_READY }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Mobility Features Example',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Mobility Features Demo'),
+      home: MyHomePage(title: 'Mobility Features Example'),
     );
   }
 }
@@ -81,39 +76,64 @@ class _MyHomePageState extends State<MyHomePage> {
 
   int _currentIndex = 0;
 
-  /// Location Streaming
-  LocationManager locationManager = LocationManager.instance;
-  Stream<LocationDto> dtoStream;
-  StreamSubscription<LocationDto> dtoSubscription;
+  // Location Streaming
+  Stream<LocationDto> locationStream;
+  StreamSubscription<LocationDto> locationSubscription;
 
-  /// Mobility Features stream
+  // Mobility Features stream
   StreamSubscription<MobilityContext> mobilitySubscription;
-  MobilityFactory mobilityFactory = MobilityFactory.instance;
   MobilityContext _mobilityContext;
 
   @override
   void initState() {
     super.initState();
 
-    /// Set up Mobility Features
-    mobilityFactory.stopDuration = Duration(seconds: 20);
-    mobilityFactory.placeRadius = 50.0;
-    mobilityFactory.stopRadius = 5.0;
+    // Set up Mobility Features
+    MobilityFeatures().stopDuration = Duration(seconds: 20);
+    MobilityFeatures().placeRadius = 50.0;
+    MobilityFeatures().stopRadius = 5.0;
 
-    /// Setup Location Manager
-    locationManager.distanceFilter = 0;
-    locationManager.interval = 1;
-    locationManager.notificationTitle = 'Mobility Features';
-    locationManager.notificationMsg = 'Your geo-location is being tracked';
+    // Setup Location Manager
+    LocationManager().distanceFilter = 0;
+    LocationManager().interval = 1;
+    LocationManager().notificationTitle = 'Mobility Features';
+    LocationManager().notificationMsg = 'Your geo-location is being tracked';
     streamInit();
   }
 
-  @override
-  void dispose() {
-    mobilitySubscription?.cancel();
-    super.dispose();
+  /// Set up streams:
+  /// * Location streaming to MobilityContext
+  /// * Subscribe to MobilityContext updates
+  void streamInit() async {
+    locationStream = LocationManager().locationStream;
+
+    // subscribe to location stream - in case this is needed in the app
+    if (locationSubscription != null) locationSubscription.cancel();
+    locationSubscription = locationStream.listen(onLocationUpdate);
+
+    // start the location service (specific to carp_background_location)
+    await LocationManager().start();
+
+    // map from [LocationDto] to [LocationSample]
+    Stream<LocationSample> locationSampleStream = locationStream.map(
+        (location) => LocationSample(
+            GeoLocation(location.latitude, location.longitude),
+            DateTime.now()));
+
+    // provide the [MobilityFeatures] instance with the LocationSample stream
+    MobilityFeatures().startListening(locationSampleStream);
+
+    // start listening to incoming MobilityContext objects
+    mobilitySubscription =
+        MobilityFeatures().contextStream.listen(onMobilityContext);
   }
 
+  /// Called whenever location changes.
+  void onLocationUpdate(LocationDto dto) {
+    print(dtoToString(dto));
+  }
+
+  /// Called whenever mobility context changes.
   void onMobilityContext(MobilityContext context) {
     print('Context received: ${context.toJson()}');
     setState(() {
@@ -122,30 +142,10 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  void streamInit() async {
-    /// Set up streams:
-    /// * Subscribe to stream in case it is already running (Android only)
-    /// * Subscribe to MobilityContext updates
-    dtoStream = locationManager.dtoStream;
-    dtoSubscription = dtoStream.listen(onData);
-
-    // Subscribe if it hasn't been done already
-    if (dtoSubscription != null) {
-      dtoSubscription.cancel();
-    }
-    dtoSubscription = dtoStream.listen(onData);
-    await locationManager.start();
-
-    Stream<LocationSample> locationSampleStream = dtoStream.map((e) =>
-        LocationSample(GeoLocation(e.latitude, e.longitude), DateTime.now()));
-
-    mobilityFactory.startListening(locationSampleStream);
-    mobilitySubscription =
-        mobilityFactory.contextStream.listen(onMobilityContext);
-  }
-
-  void onData(LocationDto dto) {
-    print(dtoToString(dto));
+  @override
+  void dispose() {
+    mobilitySubscription?.cancel();
+    super.dispose();
   }
 
   Widget get featuresOverview {
