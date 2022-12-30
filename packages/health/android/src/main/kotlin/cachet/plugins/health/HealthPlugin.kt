@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.fitness.Fitness
 import com.google.android.gms.fitness.FitnessActivities
 import com.google.android.gms.fitness.FitnessOptions
@@ -637,6 +638,27 @@ class HealthPlugin(private var channel: MethodChannel? = null) : MethodCallHandl
     activity!!.runOnUiThread { result.success(null) }
     Log.i("FLUTTER_HEALTH::ERROR", exception.message ?: "unknown error")
     Log.i("FLUTTER_HEALTH::ERROR", exception.stackTrace.toString())
+  }
+  
+  private fun disconnectGoogleFit(result: Result) {
+      val fitnessOptions = FitnessOptions.builder().build()
+
+      Fitness.getConfigClient(context, GoogleSignIn.getLastSignedInAccount(context)!!)
+          .disableFit()
+          .continueWithTask {
+              val signInOptions = GoogleSignInOptions.Builder()
+                  .addExtension(fitnessOptions)
+                  .build()
+              GoogleSignIn.getClient(context, signInOptions)
+                  .revokeAccess()
+                  .addOnSuccessListener {
+                      result.success(true)
+                  }
+                  .addOnFailureListener {
+                      // receives error with no message and status code 4
+                      result.success(false)
+                  }
+          }
   }
 
   private fun sleepDataHandler(type: String, result: Result) =
