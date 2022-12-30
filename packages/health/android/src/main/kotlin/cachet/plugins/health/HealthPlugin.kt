@@ -2,6 +2,7 @@ package cachet.plugins.health
 
 import android.app.Activity
 import android.content.Intent
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Handler
 import android.util.Log
