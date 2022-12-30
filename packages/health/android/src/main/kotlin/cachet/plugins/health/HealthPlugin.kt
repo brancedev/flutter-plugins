@@ -45,6 +45,8 @@ class HealthPlugin(private var channel: MethodChannel? = null) : MethodCallHandl
   private var activity: Activity? = null
   private var threadPoolExecutor: ExecutorService? = null
 
+  private lateinit var context: Context
+
   private var BODY_FAT_PERCENTAGE = "BODY_FAT_PERCENTAGE"
   private var HEIGHT = "HEIGHT"
   private var WEIGHT = "WEIGHT"
@@ -171,6 +173,7 @@ class HealthPlugin(private var channel: MethodChannel? = null) : MethodCallHandl
 
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     channel = MethodChannel(flutterPluginBinding.binaryMessenger, CHANNEL_NAME)
+    context = flutterPluginBinding.applicationContext
     channel?.setMethodCallHandler(this)
     threadPoolExecutor = Executors.newFixedThreadPool(4)
   }
