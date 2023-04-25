@@ -966,6 +966,7 @@ class HealthPlugin(private var channel: MethodChannel? = null) : MethodCallHandl
       "getTotalStepsInInterval" -> getTotalStepsInInterval(call, result)
       "hasPermissions" -> hasPermissions(call, result)
       "writeWorkoutData" -> writeWorkoutData(call, result)
+      "disconnectGoogleFit" -> disconnectGoogleFit(result)
       else -> result.notImplemented()
     }
   }
